@@ -10,6 +10,7 @@ function zoomBarChart(svg) {
 
   // Chart only variables
   var _chart,
+      _chartWrapper,
       _chartMargins = {top: 20, right: 20, bottom: 110, left: 40},
       _chartHeight = _svgHeight - _chartMargins.top - _chartMargins.bottom,
       _chartX, _chartY,
@@ -17,6 +18,7 @@ function zoomBarChart(svg) {
   
   // Selector only variables
   var _selector,
+      _selectorWrapper,
       _selectorMargins = {top: 430, right: 20, bottom: 30, left: 40},
       _selectorHeight = _svgHeight - _selectorMargins.top - _selectorMargins.bottom,
       _selectorX, _selectorY, 
@@ -51,20 +53,28 @@ function zoomBarChart(svg) {
               .attr("height", _svgHeight)
               .attr("width", _svgWidth);
 
-    _chart = svg.append("g")
-                .attr("class", "chart")
-                .attr("transform", "translate(" + 
-                    _chartMargins.left + "," + _chartMargins.top + ")");
-        
-    _selector = svg.append("g")
-                  .attr("class", "selector")
-                  .attr("transform", "translate(" + 
-                      _selectorMargins.left + "," + _selectorMargins.top + ")");
+    _chartWrapper = svg.append("g")
+                    .attr("class", "chartWrapper")
+                    .attr("transform", "translate(" + 
+                        0 + "," + 0 + ")");
+    _chart = _chartWrapper.append('g')
+                    .attr('class', 'chart')
+                    .attr('transform', 'translate(' +
+                        _chartMargins.left + ',' + _chartMargins.top + ')');
 
-    renderChartAxes(_chart);
-    renderSelectorAxes(_selector);
+    _selectorWrapper = svg.append("g")
+                    .attr("class", "selectorWrapper")
+                    .attr("transform", "translate(" + 
+                      0 + "," + _selectorMargins.top + ")");
+    _selector = _selectorWrapper.append('g')
+                    .attr('class', 'selector')
+                    .attr('transform', 'translate(' +
+                        _selectorMargins.left + ',' + 0 + ')')
+    
+    renderChartAxes(_chartWrapper);
+    renderSelectorAxes(_selectorWrapper);
     console.log(_data);
-    renderBars();
+    // renderBars();
     // defineBodyClip(_chart);
 
     // renderBody(_svg);
