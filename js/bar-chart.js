@@ -27,18 +27,6 @@ function init() {
         .extent([[0, 0], [width, height]])
         .on("zoom", zoomed);
 
-    // var area = d3.area()
-    //     .curve(d3.curveMonotoneX)
-    //     .x(function(d) { return x(d.date); })
-    //     .y0(height)
-    //     .y1(function(d) { return y(d.temp); });
-    // console.log('area', area)
-    // var area2 = d3.area()
-    //     .curve(d3.curveMonotoneX)
-    //     .x(function(d) { return x2(d.date); })
-    //     .y0(height2)
-    //     .y1(function(d) { return y2(d.temp); });
-
     var line = d3.line()
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.temp); });
@@ -69,20 +57,37 @@ function init() {
     x2.domain(x.domain());
     y2.domain(y.domain());
 
-    focus.append("path")
-        .datum(data)
-        .attr('class', 'line')
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1.5)
-        .attr("d", line);
+    var padding = 2; // <-A
+    
+    var bars = focus.selectAll("rect.bar")
+            .data(data);
+    bars.enter()
+            .append("rect") // <-B
+        .merge(bars)
+            .attr("class", "bar")
+            .attr("clip-path", "url(#clip)")
+            .attr("x", function (d) { 
+                return x(d.date); // <-C
+            })
+            .attr("y", function (d) { 
+                return y(d.temp); // <-D 
+            })
+            .attr("height", function (d) { 
+                return height - y(d.temp); 
+            })
+            .attr("width", function(d){
+                return Math.floor(width / data.length) - padding;
+            });
 
-    //   focus.append("path")
-    //       .datum(data)
-    //       .attr("class", "area")
-    //       .attr("d", area);
+    // focus.append("path")
+    //     .datum(data)
+    //     .attr('class', 'line')
+    //     .attr("fill", "none")
+    //     .attr("stroke", "steelblue")
+    //     .attr("stroke-linejoin", "round")
+    //     .attr("stroke-linecap", "round")
+    //     .attr("stroke-width", 1.5)
+    //     .attr("d", line);
 
     focus.append("g")
         .attr("class", "axis axis--x")
@@ -102,11 +107,6 @@ function init() {
         .attr("stroke-linecap", "round")
         .attr("stroke-width", 1.5)
         .attr("d", line2);
-
-    //   context.append("path")
-    //       .datum(data)
-    //       .attr("class", "area")
-    //       .attr("d", area2);
 
     context.append("g")
         .attr("class", "axis axis--x")
@@ -128,11 +128,18 @@ function init() {
 
     function brushed() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-    console.log('d3.event.selection', d3.event.selection)
     
     var s = d3.event.selection || x2.range();
     x.domain(s.map(x2.invert, x2));
-    focus.select(".line").attr("d", line);
+    focus.selectAll('.bar').attr("x", function (d) { 
+        return x(d.date); // <-C
+    })
+    .attr("y", function (d) { 
+        return y(d.temp); // <-D 
+    })
+    // focus.selectAll('.bar').attr("transform", function(d) { return "translate(" + x(d.date) + "," + 0 + ")"; });
+    // focus.select(".line").attr("d", line);
+
     focus.select(".axis--x").call(xAxis);
     svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
         .scale(width / (s[1] - s[0]))
@@ -143,7 +150,12 @@ function init() {
     if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
     var t = d3.event.transform;
     x.domain(t.rescaleX(x2).domain());
-    focus.select(".line").attr("d", line);
+    focus.selectAll('.bar').attr("x", function (d) { 
+        return x(d.date); // <-C
+    })
+    .attr("y", function (d) { 
+        return y(d.temp); // <-D 
+    })
     focus.select(".axis--x").call(xAxis);
     context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
     }
@@ -151,16 +163,21 @@ function init() {
     function type(inputObj) {
         var months = ['Apr','Aug','Dec','Feb','Jan','Jul','Jun','Mar',
                         'May','Nov','Oct','Sep'];
-        var outputObj = {};
-        var year = inputObj.Year;
-        for(var j = 0; j < months.length; j++) {
-            outputObj.date = parseDate(months[j] + ' ' + year);
-            outputObj.temp = +inputObj[months[j]];
-        }
+        return {
+            date: parseDate('Jan ' + inputObj.Year),
+            temp: +inputObj['J-D'],
+        };
+
+        // var outputObj = {};
+        // var year = inputObj.Year;
+        // for(var j = 0; j < months.length; j++) {
+        //     outputObj.date = parseDate(months[j] + ' ' + year);
+        //     outputObj.temp = +inputObj[months[j]];
+        // }
 
     //   d.date = parseDate(d.date);
     //   d.price = +d.price;
     //   return d;
-        return outputObj;
+        // return outputObj;
     }
 }
