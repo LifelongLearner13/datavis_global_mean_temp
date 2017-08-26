@@ -39,6 +39,11 @@ function zoomBarChart(svg) {
     return _chartObj;
   };
 
+  _chartObj.setData = function (d) {
+    _data = d;
+    return _chartObj;
+  };
+
   /****** Draw the Chart ******/
 
   _chartObj.render = function () {
@@ -58,8 +63,8 @@ function zoomBarChart(svg) {
 
     renderChartAxes(_chart);
     renderSelectorAxes(_selector);
-    // renderSelectorAxes(_selector);
-
+    console.log(_data);
+    renderBars();
     // defineBodyClip(_chart);
 
     // renderBody(_svg);
@@ -69,7 +74,6 @@ function zoomBarChart(svg) {
     var xAxis = d3.axisBottom().scale(_chartX.range([0, _width]));
     var yAxis = d3.axisLeft().scale(_chartY.range([_chartHeight, 0]));
 
-    console.log(_chartX(new Date(2017)))
     chart.append("g")
             .attr("class", "axis")
             .attr("transform", function () {
@@ -97,14 +101,67 @@ function zoomBarChart(svg) {
             .call(xAxis);
   }
  
+  function renderBars() {
+    var groupByYear = d3.nest()
+        .key(function(d) { return d.date.getFullYear();})
+        .rollup(function(v) { return d3.mean(v, function(d) { return d.temp; }); })
+        .entries(_data);
+    console.log(groupByYear)
+    var padding = 2; // <-A
+
+    var bars = _chart.selectAll("rect.bar")
+            .data(groupByYear);
+    
+    bars.enter()
+            .append("rect")
+        .merge(bars)
+            .attr("class", "bar")
+        .transition()
+            .attr("x", function (d) { 
+                return _chartX(new Date(d.key, 0, 1));
+            })
+            .attr("y", function (d) {
+                return d.value < 0 ? (_chartHeight / 2 + _chartMargins.top) : _chartY(d.value);
+            })
+            .attr("height", function (d) { 
+                return _chartHeight - _chartMargins.bottom - _chartY(d.value); 
+            })
+            .attr("width", function(d){
+                return Math.floor(_width / groupByYear.length) - padding;
+            });
+  }
+
   return _chartObj; 
+}
+var parseDate = d3.timeParse("%b %Y");
+
+function processData(rawData) {
+  var months = ['Apr','Aug','Dec','Feb','Jan','Jul','Jun','Mar',
+                'May','Nov','Oct','Sep'];
+  var newData = [];
+
+  for(var i = 0; i < rawData.length; i++) {
+    var year = rawData[i].Year;
+    for(var j = 0; j < months.length; j++) {
+      newData.push({
+        date: parseDate(months[j] + ' ' + year),
+        temp: +rawData[i][months[j]],
+      });
+    }
+  }
+
+  return newData;
 }
 
 function init() {
-  var chartArea = d3.select("#chart");
-  var chart = zoomBarChart(chartArea)
-                .chartX(d3.scaleTime().domain([new Date(1880, 0, 1), new Date(2017, 0, 1)]))
-                .chartY(d3.scaleLinear().domain([-2.0, 2.0]));
+  d3.csv('data/GLB.Ts.csv', function(result) {
+    var data = processData(result);
 
-  chart.render();
+    var chartArea = d3.select("#chart");
+    var chart = zoomBarChart(chartArea)
+                .chartX(d3.scaleTime().domain(d3.extent(data, function(d) { return d.date; })))
+                .chartY(d3.scaleLinear().domain(d3.extent(data, function(d) { return d.temp; })));
+    chart.setData(data);
+    chart.render();
+  });
 }
