@@ -1,184 +1,208 @@
 function init() {
+    /****** LOCAL VARIABLES ******/
+
+    // Elements required to render the visualization
     var svg = d3.select("svg"),
-        margin = {top: 20, right: 20, bottom: 120, left: 70},
-        margin2 = {top: 420, right: 20, bottom: 40, left: 70},
-        width = +svg.attr("width") - margin.left - margin.right,
-        height = +svg.attr("height") - margin.top - margin.bottom,
-        height2 = +svg.attr("height") - margin2.top - margin2.bottom;
+        _xChart, _yChart, _xChartAxis, _yChartAxis,
+        _chart, _selector, _brush, _zoom;
+    
+    // Dimensions used to calculate element placement
+    var chartMargin = {top: 20, right: 20, bottom: 120, left: 70},
+        selectorMargin = {top: 420, right: 20, bottom: 40, left: 70},
+        drawWidth = +svg.attr("width") - chartMargin.left - chartMargin.right,
+        chartHeight = +svg.attr("height") - chartMargin.top - chartMargin.bottom,
+        selectorHeight = +svg.attr("height") - selectorMargin.top - selectorMargin.bottom;
+
+    // Information being graphed
+    var _rawData = [];
+    var _annualMean = [];
+    var _bySeason = [];
+    var _byMonth = [];
+
+    var _keys = ['Apr','Aug','Dec','Feb','Jan','Jul','Jun','Mar',
+    'May','Nov','Oct','Sep', 'J-D', 'DJF','MAM','JJA','SON'];
 
     var parseDate = d3.timeParse("%b %Y");
-
-    var x = d3.scaleTime().range([0, width]),
-        x2 = d3.scaleTime().range([0, width]),
-        y = d3.scaleLinear().range([height, 0]),
-        y2 = d3.scaleLinear().range([height2, 0]);
-
-    var xAxis = d3.axisBottom(x),
-        xAxis2 = d3.axisBottom(x2),
-        yAxis = d3.axisLeft(y);
-
-    var brush = d3.brushX()
-        .extent([[0, 0], [width, height2]])
-        .on("brush end", brushed);
-
-    var zoom = d3.zoom()
-        .scaleExtent([1, Infinity])
-        .translateExtent([[0, 0], [width, height]])
-        .extent([[0, 0], [width, height]])
-        .on("zoom", zoomed);
 
     svg.append("defs").append("clipPath")
         .attr("id", "clip")
     .append("rect")
-        .attr("width", width)
-        .attr("height", height);
+        .attr("width", drawWidth)
+        .attr("height", chartHeight);
 
-    var focus = svg.append("g")
-        .attr("class", "focus")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    var context = svg.append("g")
-        .attr("class", "context")
-        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+    
 
     d3.csv("data/GLB.Ts.csv", type, function(error, data) {
     if (error) throw error;
-        console.log(data)
-    x.domain(d3.extent(data, function(d) { return d.date; }));
-    y.domain(d3.extent(data, function(d) { return d.temp; }));
-    x2.domain(x.domain());
-    y2.domain(y.domain());
+        _rawData = data;
 
-    var padding = 2; // <-A
-    
-    var bars = focus.selectAll("rect.bar")
-            .data(data);
-    bars.enter()
-            .append("rect") // <-B
-        .merge(bars)
-            .attr("class", "bar")
-            .attr("clip-path", "url(#clip)")
-            .attr("x", function (d) { 
-                return x(d.date); // <-C
-            })
-            .attr("y", function (d) { 
-                return y(d.temp); // <-D 
-            })
-            .attr("height", function (d) { 
-                return height - y(d.temp); 
-            })
-            .attr("width", function(d){
-                return Math.floor(width / data.length) - padding;
-            });
+        _chart = svg.append("g")
+            .attr("class", "_chart")
+            .attr("transform", "translate(" + chartMargin.left + "," + chartMargin.top + ")");
 
-    focus.append("g")
-        .attr("class", "axis axis--x")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-    focus.append("g")
-        .attr("class", "axis axis--y")
-        .call(yAxis);
+        _selector = svg.append("g")
+            .attr("class", "_selector")
+            .attr("transform", "translate(" + selectorMargin.left + "," + selectorMargin.top + ")");
         
-        var bars2 = context.selectAll("rect.bar")
-        .data(data);
-bars2.enter()
-        .append("rect") // <-B
-    .merge(bars2)
-        .attr("class", "bar")
-        .attr("x", function (d) { 
-            return x2(d.date); // <-C
-        })
-        .attr("y", function (d) { 
-            return y2(d.temp); // <-D 
-        })
-        .attr("height", function (d) { 
-            return height2 - y2(d.temp); 
-        })
-        .attr("width", function(d){
-            return Math.floor(width / data.length) - padding;
-        });
+        setupBrush();
+        setupZoom();
+        setupAxes();
+    
+    renderBars(_chart, _rawData, _xChart, _yChart, chartHeight, true);
 
-    focus.append("text")
-        .attr("text-anchor", "middle") 
-        .attr("transform", "translate("+  (-margin.left/2) +","+(height/2)+")rotate(-90)")
-        .text("Temperatures in Celsius");
 
-    context.append("g")
-        .attr("class", "axis axis--x")
-        .attr("transform", "translate(0," + height2 + ")")
-        .call(xAxis2);
-
-    context.append("g")
-        .attr("class", "brush")
-        .call(brush)
-        .call(brush.move, x.range());
-
-    context.append("text")
-        .attr("text-anchor", "middle") 
-        .attr("transform", "translate("+  (width/2) +","+(height2 + 40)+")")
-        .text("Date");
-
-    svg.append("rect")
-        .attr("class", "zoom")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
-        .call(zoom);
+    renderBars(_selector, _rawData, _xSelector, _ySelector, selectorHeight, false);
     });
 
-    function brushed() {
-    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
-    
-    var s = d3.event.selection || x2.range();
-    x.domain(s.map(x2.invert, x2));
-    focus.selectAll('.bar').attr("x", function (d) { 
-        return x(d.date); // <-C
-    })
-    .attr("y", function (d) { 
-        return y(d.temp); // <-D 
-    })
-    // focus.selectAll('.bar').attr("transform", function(d) { return "translate(" + x(d.date) + "," + 0 + ")"; });
-    // focus.select(".line").attr("d", line);
+    /****** HELPER FUNCTIONS ******/
 
-    focus.select(".axis--x").call(xAxis);
-    svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
-        .scale(width / (s[1] - s[0]))
-        .translate(-s[0], 0));
+    // Render the bars
+    function renderBars(element, data, x, y, eleHeight, clip) {
+        
+        var b = element.selectAll("rect.bar")
+                .data(data);
+                console.log(Math.floor(drawWidth / data.length))
+        b.enter()
+            .append("rect")
+        .merge(b)
+            .attr("class", "bar")
+            .attr("x", function (d) { 
+                return x(d.date);
+            })
+        .attr("y", function (d) { 
+            return isNaN(y(d.temp)) ? 0 : y(d.temp);
+        })
+        .attr("height", function (d) { 
+            return isNaN(y(d.temp)) ? 0 : eleHeight - y(d.temp); 
+        })
+        .attr("width", function(d){
+            return Math.floor(drawWidth / data.length) - 1;
+        });
+
+        if(clip) {
+            b.attr("clip-path", "url(#clip)");
+        }
+    }
+
+    // Functions handling the Axes in the Visualization
+    function setupAxes() {
+        setInitDomainRange();
+        renderAxes();
+    }
+
+    function setInitDomainRange() {
+        // Range
+        _xChart = d3.scaleTime().range([0, drawWidth]);
+        _xSelector = d3.scaleTime().range([0, drawWidth]);
+        _yChart = d3.scaleLinear().range([chartHeight, 0]);
+        _ySelector = d3.scaleLinear().range([selectorHeight, 0]);
+
+        // Orientation
+        _xChartAxis = d3.axisBottom(_xChart);
+        _xSelectorAxis = d3.axisBottom(_xSelector);
+        _yChartAxis = d3.axisLeft(_yChart);
+
+        // Domain
+        _xChart.domain(d3.extent(_rawData, function(d) { return d.date; }));
+        _yChart.domain(d3.extent(_rawData, function(d) { return d.temp; }));
+        _xSelector.domain(_xChart.domain());
+        _ySelector.domain(_yChart.domain());
+    }
+
+    function renderAxes() {
+        // X-Axes
+        _chart.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + chartHeight + ")")
+            .call(_xChartAxis);
+
+        _selector.append("g")
+            .attr("class", "axis axis--x")
+            .attr("transform", "translate(0," + selectorHeight + ")")
+            .call(_xSelectorAxis);
+
+        // Y-axis
+        _chart.append("g")
+            .attr("class", "axis axis--y")
+            .call(_yChartAxis);
+    
+        _selector.append("g")
+            .attr("class", "brush")
+            .call(_brush)
+            .call(_brush.move, _xChart.range());
+        
+        // Axes Titles
+        _chart.append("text")
+            .attr("text-anchor", "middle") 
+            .attr("transform", "translate("+  (-chartMargin.left/2) +","+(chartHeight/2)+")rotate(-90)")
+            .text("Temperatures in Celsius");
+
+        _selector.append("text")
+            .attr("text-anchor", "middle") 
+            .attr("transform", "translate("+  (drawWidth/2) +","+(selectorHeight + 40)+")")
+            .text("Date");
+    }
+
+    function setupBrush() {
+        _brush = d3.brushX()
+            .extent([[0, 0], [drawWidth, selectorHeight]])
+            .on("brush end", brushed);
+    }
+
+    function brushed() {
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+    
+        var s = d3.event.selection || _xSelector.range();
+        _xChart.domain(s.map(_xSelector.invert, _xSelector));
+        renderBars(_chart, _rawData, _xChart, _yChart, chartHeight, true);
+        _chart.select(".axis--x").call(_xChartAxis);
+        svg.select(".zoom").call(_zoom.transform, d3.zoomIdentity
+            .scale(drawWidth / (s[1] - s[0]))
+            .translate(-s[0], 0));
+    }
+
+    function setupZoom() {
+        _zoom = d3.zoom()
+            .scaleExtent([1, Infinity])
+            .translateExtent([[0, 0], [drawWidth, chartHeight]])
+            .extent([[0, 0], [drawWidth, chartHeight]])
+            .on("zoom", zoomed);
+        
+        svg.append("rect")
+            .attr("class", "zoom")
+            .attr("width", drawWidth)
+            .attr("height", chartHeight)
+            .attr("transform", "translate(" + chartMargin.left + "," + chartMargin.top + ")")
+            .call(_zoom);
     }
 
     function zoomed() {
-    if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
-    var t = d3.event.transform;
-    x.domain(t.rescaleX(x2).domain());
-    focus.selectAll('.bar').attr("x", function (d) { 
-        return x(d.date); // <-C
-    })
-    .attr("y", function (d) { 
-        return y(d.temp); // <-D 
-    })
-    focus.select(".axis--x").call(xAxis);
-    context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
+        if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+        var t = d3.event.transform;
+        _xChart.domain(t.rescaleX(_xSelector).domain());
+        renderBars(_chart, _rawData, _xChart, _yChart, chartHeight, true);
+        _chart.select(".axis--x").call(_xChartAxis);
+        _selector.select(".brush").call(_brush.move, _xChart.range().map(t.invertX, t));
     }
 
-    function type(inputObj) {
-        var months = ['Apr','Aug','Dec','Feb','Jan','Jul','Jun','Mar',
-                        'May','Nov','Oct','Sep'];
+    // Clean and Filter the raw data read from the CSV
+    // into a usable form
+    function clearAndFilter(inputObj) {
+
+
+        var outputObj = {};
+        outputObj.year = inputObj.Year;
+        for(var j = 0; j < _keys.length; j++) {
+            outputObj[_keys[j]] = +inputObj[_key[j]];
+        }
+
+        return outputObj;
+    }
+
+    function calAnnualMean(inputObj) {
         return {
-            date: parseDate('Jan ' + inputObj.Year),
-            temp: +inputObj['J-D'],
+            date: inputObj.date,
+            temp: inputObj.temp,
         };
-
-        // var outputObj = {};
-        // var year = inputObj.Year;
-        // for(var j = 0; j < months.length; j++) {
-        //     outputObj.date = parseDate(months[j] + ' ' + year);
-        //     outputObj.temp = +inputObj[months[j]];
-        // }
-
-    //   d.date = parseDate(d.date);
-    //   d.price = +d.price;
-    //   return d;
-        // return outputObj;
     }
 }
