@@ -79,16 +79,6 @@ function init() {
                 return Math.floor(width / data.length) - padding;
             });
 
-    // focus.append("path")
-    //     .datum(data)
-    //     .attr('class', 'line')
-    //     .attr("fill", "none")
-    //     .attr("stroke", "steelblue")
-    //     .attr("stroke-linejoin", "round")
-    //     .attr("stroke-linecap", "round")
-    //     .attr("stroke-width", 1.5)
-    //     .attr("d", line);
-
     focus.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height + ")")
@@ -97,17 +87,25 @@ function init() {
     focus.append("g")
         .attr("class", "axis axis--y")
         .call(yAxis);
-
-        context.append("path")
-        .datum(data)
-        .attr('class', 'line')
-        .attr("fill", "none")
-        .attr("stroke", "steelblue")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-linecap", "round")
-        .attr("stroke-width", 1.5)
-        .attr("d", line2);
-
+        
+        var bars2 = context.selectAll("rect.bar")
+        .data(data);
+bars2.enter()
+        .append("rect") // <-B
+    .merge(bars2)
+        .attr("class", "bar")
+        .attr("x", function (d) { 
+            return x2(d.date); // <-C
+        })
+        .attr("y", function (d) { 
+            return y2(d.temp); // <-D 
+        })
+        .attr("height", function (d) { 
+            return height2 - y2(d.temp); 
+        })
+        .attr("width", function(d){
+            return Math.floor(width / data.length) - padding;
+        });
     context.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height2 + ")")
