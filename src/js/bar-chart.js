@@ -11,7 +11,7 @@ function zoomBarChart(svg) {
   // Chart only variables
   var _chart,
       _chartWrapper,
-      _chartMargins = {top: 20, right: 20, bottom: 110, left: 40},
+      _chartMargins = {top: 10, right: 10, bottom: 140, left: 40},
       _chartHeight = _svgHeight - _chartMargins.top - _chartMargins.bottom,
       _chartX, _chartY,
       _chartXAxis, _chartYAxis;
@@ -19,7 +19,7 @@ function zoomBarChart(svg) {
   // Selector only variables
   var _selector,
       _selectorWrapper,
-      _selectorMargins = {top: 430, right: 20, bottom: 30, left: 40},
+      _selectorMargins = {top: 550, right: 10, bottom: 10, left: 40},
       _selectorHeight = _svgHeight - _selectorMargins.top - _selectorMargins.bottom,
       _selectorX, _selectorY, 
       _selectorXAxis, _selectorYAxis;
@@ -56,42 +56,45 @@ function zoomBarChart(svg) {
     _chartWrapper = svg.append("g")
                     .attr("class", "chartWrapper")
                     .attr("transform", "translate(" + 
-                        0 + "," + 0 + ")");
-    _chart = _chartWrapper.append('g')
-                    .attr('class', 'chart')
-                    .attr('transform', 'translate(' +
-                        _chartMargins.left + ',' + _chartMargins.top + ')');
+                    _chartMargins.left + "," + _chartMargins.top + ")");
+    renderChartAxes(svg);
+    // _chart = _chartWrapper.append('g')
+    //                 .attr('class', 'chart')
+
 
     _selectorWrapper = svg.append("g")
                     .attr("class", "selectorWrapper")
                     .attr("transform", "translate(" + 
-                      0 + "," + _selectorMargins.top + ")");
+                    _selectorMargins.left + "," + _selectorMargins.top + ")");
     _selector = _selectorWrapper.append('g')
                     .attr('class', 'selector')
                     .attr('transform', 'translate(' +
-                        _selectorMargins.left + ',' + 0 + ')')
+                        0 + ',' + 0 + ')')
     
-    renderChartAxes(_chartWrapper);
-    renderSelectorAxes(_selectorWrapper);
+    
+    renderSelectorAxes(svg);
     console.log(_data);
-    // renderBars();
+    renderBars();
     // defineBodyClip(_chart);
 
     // renderBody(_svg);
   };
 
   function renderChartAxes(chart) {
+    var axesG = svg.select("g")
+                    .attr("class", "axes");
+
     var xAxis = d3.axisBottom().scale(_chartX.range([0, _width]));
     var yAxis = d3.axisLeft().scale(_chartY.range([_chartHeight, 0]));
 
-    chart.append("g")
+    axesG.append("g")
             .attr("class", "axis")
             .attr("transform", function () {
-                return "translate(" + _chartMargins.left + "," + (_chartHeight / 2 + _chartMargins.top) + ")";
+                return "translate(" + _chartMargins.left + "," + (_chartMargins.top + _chartY(0.0)) + ")";
             })
             .call(xAxis);
 
-    chart.append("g")
+    axesG.append("g")
             .attr("class", "axis")
             .attr("transform", function () {
                 return "translate(" + _chartMargins.left + "," + _chartMargins.top + ")";
@@ -100,13 +103,15 @@ function zoomBarChart(svg) {
   }
 
   function renderSelectorAxes(selector) {
+    var axesG = svg.select('.axes');
+
     var xAxis = d3.axisBottom().scale(_chartX.range([0, _width]));
     var yAxis = d3.axisLeft().scale(_chartY.range([_selectorHeight, 0]));
 
-    selector.append("g")
+    axesG.append("g")
             .attr("class", "axis")
             .attr("transform", function () {
-                return "translate(" + _selectorMargins.left + "," + _selectorHeight + ")";
+                return "translate(" + _selectorMargins.left + "," + _selectorMargins.top + ")";
             })
             .call(xAxis);
   }
@@ -119,24 +124,25 @@ function zoomBarChart(svg) {
     console.log(groupByYear)
     var padding = 2; // <-A
 
-    var bars = _chart.selectAll("rect.bar")
+    var bars = _chart.selectAll('rect.bar')
             .data(groupByYear);
-    
+    console.log(_chartY(0.00))
+    console.log()
     bars.enter()
-            .append("rect")
+            .append('rect')
         .merge(bars)
-            .attr("class", "bar")
+            .attr('class', 'bar')
         .transition()
-            .attr("x", function (d) { 
+            .attr('x', function (d) { 
                 return _chartX(new Date(d.key, 0, 1));
             })
-            .attr("y", function (d) {
-                return d.value < 0 ? (_chartHeight / 2 + _chartMargins.top) : _chartY(d.value);
+            .attr('y', function (d) {
+                return d.value < 0 ? (_chartHeight / 2 + _chartY(0.0)) : _chartY(d.value);
             })
-            .attr("height", function (d) { 
-                return (_chartHeight / 2 + _chartMargins.top) - _chartY(d.value); 
+            .attr('height', function (d) { 
+                return (_chartMargins.top + _chartY(0.0)) - _chartY(d.value); 
             })
-            .attr("width", function(d){
+            .attr('width', function(d){
                 return Math.floor(_width / groupByYear.length) - padding;
             });
   }
