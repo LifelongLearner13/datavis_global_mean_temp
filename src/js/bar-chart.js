@@ -19,7 +19,7 @@ function zoomBarChart(svg) {
   // Selector only variables
   var _selector,
       _selectorWrapper,
-      _selectorMargins = {top: 550, right: 10, bottom: 10, left: 40},
+      _selectorMargins = {top: 460, right: 10, bottom: 30, left: 40},
       _selectorHeight = _svgHeight - _selectorMargins.top - _selectorMargins.bottom,
       _selectorX, _selectorY, 
       _selectorXAxis, _selectorYAxis;
@@ -53,26 +53,20 @@ function zoomBarChart(svg) {
               .attr("height", _svgHeight)
               .attr("width", _svgWidth);
 
-    _chartWrapper = svg.append("g")
-                    .attr("class", "chartWrapper")
+    _chart = svg.append("g")
+                    .attr("class", "chart")
                     .attr("transform", "translate(" + 
-                    _chartMargins.left + "," + _chartMargins.top + ")");
+                        _chartMargins.left + "," + _chartMargins.top + ")");
     renderChartAxes(svg);
-    // _chart = _chartWrapper.append('g')
-    //                 .attr('class', 'chart')
+    renderSelectorAxes(svg);
 
-
-    _selectorWrapper = svg.append("g")
-                    .attr("class", "selectorWrapper")
-                    .attr("transform", "translate(" + 
-                    _selectorMargins.left + "," + _selectorMargins.top + ")");
-    _selector = _selectorWrapper.append('g')
+    _selector = svg.append('g')
                     .attr('class', 'selector')
                     .attr('transform', 'translate(' +
-                        0 + ',' + 0 + ')')
+                        0 + ',' + 0 + ')');
     
     
-    renderSelectorAxes(svg);
+    
     console.log(_data);
     renderBars();
     // defineBodyClip(_chart);
@@ -111,7 +105,7 @@ function zoomBarChart(svg) {
     axesG.append("g")
             .attr("class", "axis")
             .attr("transform", function () {
-                return "translate(" + _selectorMargins.left + "," + _selectorMargins.top + ")";
+                return "translate(" + _selectorMargins.left + "," + (_selectorMargins.top + _selectorHeight)  + ")";
             })
             .call(xAxis);
   }
