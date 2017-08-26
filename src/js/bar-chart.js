@@ -57,6 +57,7 @@ function zoomBarChart(svg) {
                       _selectorMargins.left + "," + _selectorMargins.top + ")");
 
     renderChartAxes(_chart);
+    renderSelectorAxes(_selector);
     // renderSelectorAxes(_selector);
 
     // defineBodyClip(_chart);
@@ -82,6 +83,18 @@ function zoomBarChart(svg) {
                 return "translate(" + _chartMargins.left + "," + _chartMargins.top + ")";
             })
             .call(yAxis);
+  }
+
+  function renderSelectorAxes(selector) {
+    var xAxis = d3.axisBottom().scale(_chartX.range([0, _width]));
+    var yAxis = d3.axisLeft().scale(_chartY.range([_selectorHeight, 0]));
+
+    selector.append("g")
+            .attr("class", "axis")
+            .attr("transform", function () {
+                return "translate(" + _selectorMargins.left + "," + _selectorHeight + ")";
+            })
+            .call(xAxis);
   }
  
   return _chartObj; 
