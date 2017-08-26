@@ -124,7 +124,7 @@ function zoomBarChart(svg) {
                 return d.value < 0 ? (_chartHeight / 2 + _chartMargins.top) : _chartY(d.value);
             })
             .attr("height", function (d) { 
-                return _chartHeight - _chartMargins.bottom - _chartY(d.value); 
+                return (_chartHeight / 2 + _chartMargins.top) - _chartY(d.value); 
             })
             .attr("width", function(d){
                 return Math.floor(_width / groupByYear.length) - padding;
