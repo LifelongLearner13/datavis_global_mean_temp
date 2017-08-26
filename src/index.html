@@ -12,7 +12,7 @@
     </head>
     <body>
       <h1>Data Visualization: Programming Assignment 1</h1>
-      <svg id="chart"></svg>
+      <svg id="chart" width="960" height="600"></svg>
       <h2>Explanation</h2>
       <p>The chart depicts the estimated global mean temperatures from 1880 through 2017 in celsius.</p>
       <h2>Data Source</h2>
@@ -20,4 +20,9 @@
       <h2>Technologies Used</h2>
       <a href="https://d3js.org/">D3.js</a>
     </body>
+    <script>
+      window.onload = function() {
+        init();
+      };
+    </script>
 </html>
