@@ -1,7 +1,7 @@
 function init() {
     var svg = d3.select("svg"),
-        margin = {top: 20, right: 20, bottom: 110, left: 40},
-        margin2 = {top: 430, right: 20, bottom: 30, left: 40},
+        margin = {top: 20, right: 20, bottom: 120, left: 70},
+        margin2 = {top: 420, right: 20, bottom: 40, left: 70},
         width = +svg.attr("width") - margin.left - margin.right,
         height = +svg.attr("height") - margin.top - margin.bottom,
         height2 = +svg.attr("height") - margin2.top - margin2.bottom;
@@ -26,14 +26,6 @@ function init() {
         .translateExtent([[0, 0], [width, height]])
         .extent([[0, 0], [width, height]])
         .on("zoom", zoomed);
-
-    var line = d3.line()
-        .x(function(d) { return x(d.date); })
-        .y(function(d) { return y(d.temp); });
-
-    var line2 = d3.line()
-        .x(function(d) { return x2(d.date); })
-        .y(function(d) { return y2(d.temp); });
 
     svg.append("defs").append("clipPath")
         .attr("id", "clip")
@@ -106,6 +98,12 @@ bars2.enter()
         .attr("width", function(d){
             return Math.floor(width / data.length) - padding;
         });
+
+    focus.append("text")
+        .attr("text-anchor", "middle") 
+        .attr("transform", "translate("+  (-margin.left/2) +","+(height/2)+")rotate(-90)")
+        .text("Temperatures in Celsius");
+
     context.append("g")
         .attr("class", "axis axis--x")
         .attr("transform", "translate(0," + height2 + ")")
@@ -115,6 +113,11 @@ bars2.enter()
         .attr("class", "brush")
         .call(brush)
         .call(brush.move, x.range());
+
+    context.append("text")
+        .attr("text-anchor", "middle") 
+        .attr("transform", "translate("+  (width/2) +","+(height2 + 40)+")")
+        .text("Date");
 
     svg.append("rect")
         .attr("class", "zoom")
