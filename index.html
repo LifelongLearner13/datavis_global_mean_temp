@@ -8,21 +8,7 @@
   <meta name="keywords" content="HTML,CSS,XML,JavaScript">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    .zoom {
-      cursor: move;
-      fill: none;
-      pointer-events: all;
-    }
-
-    .negative {
-      background-color: blue;
-    }
-
-    .positive {
-      background-color: red;
-    }
-  </style>
+  <link rel = "stylesheet" type = "text/css" href = "css/styles.css" />
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script src="./js/bar-chart.js"></script>
 </head>
@@ -31,7 +17,7 @@
   <h1>Data Visualization: Programming Assignment 1</h1>
   <section>
     <h2 id="chart-title">Estimated Annual Global Mean Temperatures from 1880 through 2017</h2>
-    <p class="for-screen-readers">Interactive chart shows mean temperatures from 1880 through 1937 below zero degrees Celsius. Temperatures from 1938 through
+    <p class="hidden">Interactive chart shows mean temperatures from 1880 through 1937 below zero degrees Celsius. Temperatures from 1938 through
       1976 are mostly below zero degrees Celsius with a few exceptions. From 1977 through 2017 all temperatures are above
       zero degrees Celsius.</p>
     <svg aria-hidden="true" class="left" width="960" height="500">

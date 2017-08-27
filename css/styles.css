@@ -1,0 +1,35 @@
+html {
+  margin: 0px 50px;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+#chart-title {
+  display: block;
+  width: 100%;
+  margin: 5px auto 5px auto;
+  font-size: 1em;
+}
+
+svg {
+  display: block;
+  margin: 0px auto;
+}
+
+.hidden {
+  position:absolute;
+  left:-10000px;
+  top:auto;
+  width:1px;
+  height:1px;
+  overflow:hidden;
+}
+
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
+
