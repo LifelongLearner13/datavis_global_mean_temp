@@ -14,13 +14,13 @@ I started the project by exploring examples on the [D3 Gal](https://github.com/d
 
 ## Technical To-Dos:
 
-- [] Reduce/elinate the global variables
-- [] Modularize code using classes
-- [] Use D3 color scale instead of hard coded values
-- [] Automate the creation of the legend
+- [ ] Reduce/elinate the global variables
+- [ ] Modularize code using classes
+- [ ] Use D3 color scale instead of hard coded values
+- [ ] Automate the creation of the legend
 
 ## Visualization To-Dos:
 
-- [] Zoom shows more data, for example, the mean temperatures for each month in a year.
+- [ ] Zoom shows more data, for example, the mean temperatures for each month in a year.
 
 
