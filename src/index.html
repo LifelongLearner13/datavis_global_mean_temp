@@ -28,6 +28,7 @@
     </head>
     <body>
       <h1>Data Visualization: Programming Assignment 1</h1>
+      <h2>Estimated Annual Global Mean Temperatures from 1880 through 2017</h2>
       <svg width="960" height="500"></svg>
       <h2>Explanation</h2>
       <p>The chart depicts the estimated global mean temperatures from 1880 through 2017 in celsius.</p>
@@ -35,10 +36,22 @@
       <p>National Aeronautics and Space Administration Goddard Institute for Space Studies. (2017). Global-mean Monthly, Seasonal, and Annual Means [Data File]. Retrieved August 23, 2017, from <a href="https://data.giss.nasa.gov/gistemp/">https://data.giss.nasa.gov/gistemp/</a></p>
       <h2>Technologies Used</h2>
       <a href="https://d3js.org/">D3.js</a>
+      <h2>Sources</h2>
+      <ul>
+        <li><a href="https://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172">Brush & Zoom</a> by Mike Bostock</li>
+        <li>http://bl.ocks.org/godds/ec089a2cf3e06a2cd5fc</li>
+        <li>https://bl.ocks.org/mbostock/3883245</li>
+        <li>https://bl.ocks.org/mbostock/3883245</li>
+        <li>http://www.sarasoueidan.com/blog/svg-transformations/</li>
+        <li>https://gist.github.com/mbostock/3019563</li>
+        <li>https://bl.ocks.org/mbostock/6232537</li>
+        <li>https://stackoverflow.com/questions/13181194/d3js-when-to-use-datum-and-data</li>
+        <li>http://blockbuilder.org/aendrew/6216809b022682bb8c247d37b9df32dc</li>
+      </ul>
     </body>
     <script>
       window.onload = function() {
-        init();
+        zoomBarChart();
       };
     </script>
 </html>
