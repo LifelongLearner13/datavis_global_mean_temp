@@ -73,10 +73,8 @@ function zoomBarChart() {
 
     // Render the bars
     function renderBars(element, data, x, y, eleHeight, clip) {
-        console.log('width: Math.floor(' + drawWidth + '/' + data.length + ') - 1');
         var b = element.selectAll('rect.bar')
                 .data(data);
-                console.log(Math.floor(drawWidth / data.length))
         b.enter()
             .append('rect')
         .merge(b)
