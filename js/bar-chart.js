@@ -37,6 +37,7 @@ function init() {
         setupBrush();
         setupZoom();
         setupAxes(_byYear);
+        renderGuideLines()
     
         renderBars(_chart, _byYear, _xChart, _yChart, chartHeight, true);
         renderBars(_selector, _byYear, _xSelector, _ySelector, selectorHeight, false);
@@ -147,15 +148,49 @@ function init() {
             .call(_brush.move, _xChart.range());
         
         // Axes Titles
-        _chart.append("text")
+        _chart.append('text')
             .attr("text-anchor", "middle") 
             .attr("transform", "translate("+  (-chartMargin.left/2) +","+(chartHeight/2)+")rotate(-90)")
-            .text("Temperatures in Celsius");
+            .text('Mean Temperatures in Celsius');
 
         _selector.append("text")
             .attr("text-anchor", "middle") 
             .attr("transform", "translate("+  (drawWidth/2) +","+(selectorHeight + 40)+")")
             .text("Date");
+    }
+    
+    function renderGuideLines() {
+        _chart.append('line')
+                .attr('x1', 0)
+                .attr('y1', _yChart(0))
+                .attr('x2', drawWidth)
+                .attr('y2', _yChart(0))
+                .attr('stroke-width', 1)
+                .attr('stroke', 'rgba(15, 15, 15, 0.61)');
+        
+        _chart.append('line')
+                .attr('x1', 0)
+                .attr('y1', 0)
+                .attr('x2', drawWidth)
+                .attr('y2', 0)
+                .attr('stroke-width', 1)
+                .attr('stroke', 'rgba(15, 15, 15, 0.61)');
+        
+        _chart.append('line')
+                .attr('x1', drawWidth)
+                .attr('y1', 0)
+                .attr('x2', drawWidth)
+                .attr('y2', chartHeight)
+                .attr('stroke-width', 1)
+                .attr('stroke', 'rgba(15, 15, 15, 0.61)');
+
+        _selector.append('line')
+                .attr('x1', 0)
+                .attr('y1', _ySelector(0))
+                .attr('x2', drawWidth)
+                .attr('y2', _ySelector(0))
+                .attr('stroke-width', 1)
+                .attr('stroke', 'rgba(15, 15, 15, 0.61)');
     }
 
     // Handle the interactive selection and panning
