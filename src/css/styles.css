@@ -26,6 +26,17 @@ svg {
   height:1px;
   overflow:hidden;
 }
+.icon {
+  display: block;
+  margin: 0 auto;
+}
+
+.icon img {
+  width: 50px;
+  height: auto;
+  margin: 0 auto;
+  display: block;
+}
 
 .zoom {
   cursor: move;
